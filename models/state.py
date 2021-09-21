@@ -14,7 +14,7 @@ class State(BaseModel, Base):
 
     if models.is_db == "db":
         name = Column(String(128), nullable=False)
-        cities = relationship('City', cascade='all')
+        cities = relationship('City', cascade='all', backref="state")
     else:
         name = ""
 
