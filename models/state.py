@@ -5,6 +5,7 @@ from models.city import City
 from models.base_model import Base, BaseModel
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship
 
 
 class State(BaseModel, Base):
@@ -13,13 +14,14 @@ class State(BaseModel, Base):
 
     if models.is_db == "db":
         name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='state', cascade='delete')
+        cities = relationship('City', cascade='all')
     else:
         name = ""
 
     if models.is_db != 'db':
         @property
         def cities(self):
+            """returns city list instead"""
             cities_list = []
             all_cities = models.storage.all(City).values()
             for ct in all_cities:
