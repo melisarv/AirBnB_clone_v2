@@ -11,6 +11,9 @@ from models.user import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+classes = {"City": City, "State": State, "User": User,
+           "Place": Place, "Review": Review, "Amenity": Amenity}
+
 
 class DBStorage:
     """This class manages storage of hbnb models in a database"""
@@ -32,21 +35,19 @@ class DBStorage:
 
     def all(self, cls=None):
         """ Queries a database for objects """
-        if not cls:
-            res_list = self.__session.query(Amenity)
-            res_list.extend(self.__session.query(City))
-            res_list.extend(self.__session.query(Place))
-            res_list.extend(self.__session.query(Review))
-            res_list.extend(self.__session.query(State))
-            res_list.extend(self.__session.query(User))
-        else:
-            res_list = res_list = self.__session.query(cls)
-        return {'{}.{}'.format(type(obj).__name__, obj.id): obj
-                for obj in res_list}
+        dictionary = {}
+        for c in classes:
+            if cls is None or cls is classes[c] or cls is c:
+                objs = self.__session.query(classes[c]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    dictionary[key] = obj
+        return (dictionary)
 
     def new(self, obj):
         """ Adds an objet to the current db session """
-        self.__session.add(obj)
+        if obj:
+            self.__session.add(obj)
 
     def save(self):
         """ Commit all changes of the current database session """
@@ -60,8 +61,11 @@ class DBStorage:
     def reload(self):
         """ Handles db and session creation """
         Base.metadata.create_all(self.__engine)
-
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
+        Session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(Session_factory)
         self.__session = Session()
+
+    def close(self):
+        """close the Session
+        """
+        self.__session.close()
