@@ -2,23 +2,19 @@
 """ State Module for HBNB project """
 import models
 from models.city import City
-from models.base_model import Base, BaseModel
+from models.base_model import BaseModel, Base
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import relationship
+import os
 
 
 class State(BaseModel, Base):
     """ State class """
     __tablename__ = 'states'
+    name = Column(String(128), nullable=False)
+    cities = relationship('City', cascade='all', backref="state")
 
-    if models.is_db == "db":
-        name = Column(String(128), nullable=False)
-        cities = relationship('City', cascade='all', backref="state")
-    else:
-        name = ""
-
-    if models.is_db != 'db':
+    if ("HBNB_TYPE_STORAGE", None) is None:
         @property
         def cities(self):
             """returns city list instead"""
